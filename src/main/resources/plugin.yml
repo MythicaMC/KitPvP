@@ -1,0 +1,7 @@
+name: MythicaKitPvP
+version: '1.0-SNAPSHOT'
+main: com.mythicamc.KitPvP
+api-version: '1.21'
+authors: [ Rhydium ]
+description: KitPvP custom built for MythicaMC
+website: https://mythicamc.com
