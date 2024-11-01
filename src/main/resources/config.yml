@@ -1,4 +1,4 @@
-combatlog:
+combat:
   tag-duration: 15    # Duration in seconds that players remain in combat after being hit
   ban-duration: 10m   # Duration of the temporary ban (e.g., '10m' for 10 minutes)
 

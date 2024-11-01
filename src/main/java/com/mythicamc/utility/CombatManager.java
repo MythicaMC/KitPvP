@@ -16,17 +16,31 @@ public class CombatManager {
         this.combatTaggedPlayers = new HashMap<>();
     }
 
-    public void tagPlayer(Player p) {
-        long tagDuration = plugin.getConfig().getLong("combatlog.tag-duration") * 1000; // Convert to milliseconds
-        combatTaggedPlayers.put(p.getUniqueId(), System.currentTimeMillis() + tagDuration);
+    public boolean tagPlayer(Player p) {
+        UUID playerId = p.getUniqueId();
+        long currentTime = System.currentTimeMillis();
+        long tagDuration = plugin.getConfig().getLong("combat.tag-duration") * 1000; // Convert to milliseconds
+        if (tagDuration <= 0) {
+            plugin.getLogger().warning("Invalid combat tag duration: " + tagDuration + "ms. Check your config.yml.");
+            tagDuration = 15000; // Default to 15 seconds if invalid
+        }
+        long tagExpiryTime = currentTime + tagDuration;
+
+        boolean wasAlreadyTagged = isTagged(p);
+
+        combatTaggedPlayers.put(playerId, tagExpiryTime);
+
+        plugin.getLogger().info("Player " + p.getName() + " tagged. Expires at: " + tagExpiryTime);
+
+        return wasAlreadyTagged;
     }
 
     public boolean isTagged(Player p) {
         UUID playerId = p.getUniqueId();
-        if (!combatTaggedPlayers.containsKey(playerId)) {
+        Long tagExpiryTime = combatTaggedPlayers.get(playerId);
+        if (tagExpiryTime == null) {
             return false;
         }
-        long tagExpiryTime = combatTaggedPlayers.get(playerId);
         if (System.currentTimeMillis() > tagExpiryTime) {
             combatTaggedPlayers.remove(playerId);
             return false;
@@ -36,5 +50,15 @@ public class CombatManager {
 
     public void removeTag(Player p) {
         combatTaggedPlayers.remove(p.getUniqueId());
+    }
+
+    public long getRemainingTagTime(Player p) {
+        UUID playerId = p.getUniqueId();
+        Long tagExpiryTime = combatTaggedPlayers.get(playerId);
+        if (tagExpiryTime == null) {
+            return 0;
+        }
+        long remainingTime = tagExpiryTime - System.currentTimeMillis();
+        return Math.max(remainingTime, 0);
     }
 }

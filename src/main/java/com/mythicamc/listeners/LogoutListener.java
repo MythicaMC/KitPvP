@@ -36,6 +36,7 @@ public class LogoutListener implements Listener {
 
         // Ban the player using LiteBans
         String banDuration = plugin.getConfig().getString("combat.ban-duration");
+        System.out.println("[DEBUG] VARIABLE banDuration: " + banDuration);
         String reason = "Combat Logging";
 
         // Execute LiteBans ban command

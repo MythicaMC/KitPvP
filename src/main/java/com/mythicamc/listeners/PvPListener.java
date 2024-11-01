@@ -2,21 +2,34 @@ package com.mythicamc.listeners;
 
 import com.mythicamc.KitPvP;
 import com.mythicamc.utility.CombatManager;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class PvPListener implements Listener {
 
+    private final KitPvP plugin;
     private final CombatManager combatManager;
 
+    private final Map<UUID, BukkitTask> combatTagTimers = new HashMap<>();
+
     public PvPListener(KitPvP plugin) {
+        this.plugin = plugin;
         this.combatManager = plugin.getCombatManager();
     }
 
@@ -25,20 +38,47 @@ public class PvPListener implements Listener {
         // Check if both entities are players
         if (e.getEntity() instanceof Player damaged && e.getDamager() instanceof Player damager) {
             // Tag both players
-            combatManager.tagPlayer(damaged);
-            combatManager.tagPlayer(damager);
+            boolean damagedWasTagged = combatManager.tagPlayer(damaged);
+            boolean damagerWasTagged = combatManager.tagPlayer(damager);
 
-            // Notify players
-            damager.sendMessage(ChatColor.RED + "You are now in combat!");
-            damaged.sendMessage(ChatColor.RED + "You are now in combat!");
+            // Notify players only if they were not already tagged
+            String tagMessage = plugin.getConfig().getString("messages.combat-tagged", "&cYou are now in combat!");
+            if (!damagerWasTagged) {
+                damager.playSound(damager.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 1.0f, 1.0f);
+                damager.sendMessage(ChatColor.translateAlternateColorCodes('&', tagMessage));
+            }
+            if (!damagedWasTagged) {
+                damaged.playSound(damaged.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 1.0f, 1.0f);
+                damaged.sendMessage(ChatColor.translateAlternateColorCodes('&', tagMessage));
+            }
+
+            // Start combat tag timer in action bar
+            startCombatTagTimer(damaged);
+            startCombatTagTimer(damager);
+        }
+    }
+
+    private void cancelCombatTagTimer(Player p) {
+        UUID playerId = p.getUniqueId();
+        if (combatTagTimers.containsKey(playerId)) {
+            combatTagTimers.get(playerId).cancel();
+            combatTagTimers.remove(playerId);
         }
     }
 
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent e) {
         Player p = e.getEntity();
-
         combatManager.removeTag(p);
+        p.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("messages.combat-tagged", "&cYou are now in combat!")));
+        cancelCombatTagTimer(p);
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent e) {
+        Player p = e.getPlayer();
+        combatManager.removeTag(p);
+        cancelCombatTagTimer(p);
     }
 
     @EventHandler
@@ -54,5 +94,59 @@ public class PvPListener implements Listener {
                 e.setCancelled(true);
             }
         }
+    }
+
+    private void startCombatTagTimer(Player p) {
+        UUID playerId = p.getUniqueId();
+
+        // Cancel any existing timer for the player
+        if (combatTagTimers.containsKey(playerId)) {
+            combatTagTimers.get(playerId).cancel();
+        }
+
+        BukkitTask task = new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (!p.isOnline()) {
+                    cancel();
+                    combatTagTimers.remove(playerId);
+                    return;
+                }
+
+                long remainingTime = combatManager.getRemainingTagTime(p);
+                int secondsLeft = (int) Math.ceil(remainingTime / 1000.0);
+
+                if (remainingTime <= 0) {
+                    // Play sound
+                    p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
+
+                    // Send action bar message
+                    String actionBarMessage = ChatColor.translateAlternateColorCodes('&', "&aYou are no longer in combat!");
+                    p.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(actionBarMessage));
+
+                    // Send chat message
+                    String untagMessage = plugin.getConfig().getString("messages.combat-untagged", "&aYou are no longer in combat!");
+                    p.sendMessage(ChatColor.translateAlternateColorCodes('&', untagMessage));
+
+                    // Remove combat tag
+                    combatManager.removeTag(p);
+
+                    // Cancel the timer
+                    cancel();
+                    combatTagTimers.remove(playerId);
+                    return;
+                }
+
+                if (secondsLeft <= 3) {
+                    p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
+                }
+
+                String actionBarMessage = ChatColor.translateAlternateColorCodes('&', "&cIn combat: " + secondsLeft + " seconds!");
+                p.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(actionBarMessage));
+            }
+        }.runTaskTimer(plugin, 0L, 20L); // Update every second
+
+        // Store the task so we can cancel it later if needed
+        combatTagTimers.put(playerId, task);
     }
 }
