@@ -2,6 +2,15 @@ combat:
   tag-duration: 15    # Duration in seconds that players remain in combat after being hit
   ban-duration: 10m   # Duration of the temporary ban (e.g., '10m' for 10 minutes)
 
+kill-reward: 10 # Coins rewarded per kill
+
+respawn:
+  countdown: 3
+  death-title: "&cYOU DIED!"
+  death-subtitle: "&eRespawning in %seconds%..."
+  respawn-title: "&aReady to fight."
+  respawn-subtitle: ""
+
 messages:
   combat-tagged: "&cYou are now in combat!"
   combat-untagged: "&aYou are no longer in combat!"

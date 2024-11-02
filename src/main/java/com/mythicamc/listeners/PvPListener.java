@@ -14,10 +14,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -103,6 +100,9 @@ public class PvPListener implements Listener {
         Player p = e.getPlayer();
         combatManager.removeTag(p);
         cancelCombatTagTimer(p);
+
+        // Remove player's scoreboard
+        plugin.getScoreboardManager().removeScoreboard(p);
     }
 
     @EventHandler
@@ -126,6 +126,20 @@ public class PvPListener implements Listener {
                 e.setCancelled(true);
             }
         }
+    }
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+
+        // Initialize stats
+        plugin.getStatsManager().initializePlayerStats(player);
+
+        // Create scoreboard
+        plugin.getScoreboardManager().createScoreboard(player);
+
+        // Update scoreboard
+        plugin.getScoreboardManager().updateScoreboard(player);
     }
 
     private void cancelCombatTagTimer(Player p) {
@@ -170,6 +184,9 @@ public class PvPListener implements Listener {
 
                     // Remove combat tag
                     combatManager.removeTag(p);
+
+                    // Update scoreboard
+                    plugin.getScoreboardManager().updateScoreboard(p);
 
                     // Cancel the timer
                     cancel();
@@ -254,6 +271,25 @@ public class PvPListener implements Listener {
 
         // Send messages to victim and killer
         sendDeathMessages(victim, killer);
+
+        // Update stats
+        plugin.getStatsManager().addDeath(victim);
+        if (killer != null) {
+            plugin.getStatsManager().addKill(killer);
+
+            // Reward killer with coins
+            int killReward = plugin.getConfig().getInt("kill-reward", 10);
+            plugin.getStatsManager().addCoins(killer, killReward);
+
+            // Notify killer
+            killer.sendMessage(ChatColor.GREEN + "You received " + killReward + " coins for killing " + victim.getName() + "!");
+        }
+
+        // Update the scoreboards
+        plugin.getScoreboardManager().updateScoreboard(victim);
+        if (killer != null) {
+            plugin.getScoreboardManager().updateScoreboard(killer);
+        }
 
         // Start respawn countdown
         startRespawnCountdown(victim);
