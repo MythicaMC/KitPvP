@@ -17,5 +17,29 @@ public class LogoutListener implements Listener {
         this.combatManager = plugin.getCombatManager();
     }
 
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent e) {
+        Player p = e.getPlayer();
 
+        if (combatManager.isTagged(p)) {
+            handleCombatLog(p);
+        } else {
+            // Optional: Handle players who are not combat-tagged
+        }
+
+        // Clean up any combat tags
+        combatManager.removeTag(p);
+    }
+
+    private void handleCombatLog(Player p) {
+        p.setHealth(0.0);
+
+        // Ban the player using LiteBans
+        String banDuration = plugin.getConfig().getString("combat.ban-duration");
+        String reason = "Combat Logging";
+
+        // Execute LiteBans ban command
+        String command = String.format("tempban %s %s %s", p.getName(), banDuration, reason);
+        plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), command);
+    }
 }
