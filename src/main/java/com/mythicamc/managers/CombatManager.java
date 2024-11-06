@@ -1,4 +1,4 @@
-package com.mythicamc.utility;
+package com.mythicamc.managers;
 
 import com.mythicamc.KitPvP;
 import org.bukkit.entity.Player;

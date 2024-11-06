@@ -1,7 +1,7 @@
 package com.mythicamc.listeners;
 
 import com.mythicamc.KitPvP;
-import com.mythicamc.utility.CombatManager;
+import com.mythicamc.managers.CombatManager;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
@@ -44,11 +44,9 @@ public class PvPListener implements Listener {
             // Notify players only if they were not already tagged
             String tagMessage = plugin.getConfig().getString("messages.combat-tagged", "&cYou are now in combat!");
             if (!damagerWasTagged) {
-                damager.playSound(damager.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 1.0f, 1.0f);
                 damager.sendMessage(ChatColor.translateAlternateColorCodes('&', tagMessage));
             }
             if (!damagedWasTagged) {
-                damaged.playSound(damaged.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 1.0f, 1.0f);
                 damaged.sendMessage(ChatColor.translateAlternateColorCodes('&', tagMessage));
             }
 
@@ -98,11 +96,7 @@ public class PvPListener implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent e) {
         Player p = e.getPlayer();
-        combatManager.removeTag(p);
         cancelCombatTagTimer(p);
-
-        // Remove player's scoreboard
-        plugin.getScoreboardManager().removeScoreboard(p);
     }
 
     @EventHandler
@@ -126,20 +120,6 @@ public class PvPListener implements Listener {
                 e.setCancelled(true);
             }
         }
-    }
-
-    @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event) {
-        Player player = event.getPlayer();
-
-        // Initialize stats
-        plugin.getStatsManager().initializePlayerStats(player);
-
-        // Create scoreboard
-        plugin.getScoreboardManager().createScoreboard(player);
-
-        // Update scoreboard
-        plugin.getScoreboardManager().updateScoreboard(player);
     }
 
     private void cancelCombatTagTimer(Player p) {

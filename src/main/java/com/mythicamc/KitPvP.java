@@ -1,10 +1,12 @@
 package com.mythicamc;
 
-import com.mythicamc.listeners.LogoutListener;
+import com.mythicamc.listeners.PlayerQuitListener;
+import com.mythicamc.listeners.PlayerJoinListener;
 import com.mythicamc.listeners.PvPListener;
-import com.mythicamc.utility.CombatManager;
-import com.mythicamc.utility.PlayerScoreboardManager;
-import com.mythicamc.utility.PlayerStatsManager;
+import com.mythicamc.managers.CombatManager;
+import com.mythicamc.managers.DatabaseManager;
+import com.mythicamc.managers.PlayerScoreboardManager;
+import com.mythicamc.managers.PlayerStatsManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class KitPvP extends JavaPlugin {
@@ -12,34 +14,52 @@ public final class KitPvP extends JavaPlugin {
     private CombatManager combatManager;
     private PlayerScoreboardManager scoreboardManager;
     private PlayerStatsManager statsManager;
+    private DatabaseManager databaseManager;
 
     @Override
     public void onEnable() {
         // Save the default config if it doesn't exist
         saveDefaultConfig();
 
-        // Validate the config for basic errors that cause errors
-        validateConfig();
+        // Initialize DatabaseManager
+        DatabaseManager.DatabaseType dbType = getConfig().getString("database.type").equalsIgnoreCase("mysql") ? DatabaseManager.DatabaseType.MYSQL : DatabaseManager.DatabaseType.SQLITE;
+        databaseManager = new DatabaseManager(this, dbType);
+        databaseManager.connect();
 
-        // Initialize CombatManager, statsManager and scoreboardManager
+        // Initialize other managers
         combatManager = new CombatManager(this);
-        statsManager = new PlayerStatsManager();
+        statsManager = new PlayerStatsManager(databaseManager);
         scoreboardManager = new PlayerScoreboardManager(this);
 
         // Start the scoreboard updater
         scoreboardManager.startScoreboardUpdater();
 
-        // Register event listeners
-        getServer().getPluginManager().registerEvents(new PvPListener(this), this);
-        getServer().getPluginManager().registerEvents(new LogoutListener(this), this);
+        // Register commands
+        registerCommands();
 
+        // Register event listeners
+        registerListeners();
+
+        // Tell console we're running!
         getLogger().info("KitPvP has been enabled.");
     }
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
+        if (databaseManager != null) {
+            databaseManager.closeConnection();
+        }
         getLogger().info("KitPvP is disabled!");
+    }
+
+    private void registerCommands() {
+        // SOON
+    }
+
+    private void registerListeners() {
+        getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
+        getServer().getPluginManager().registerEvents(new PvPListener(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerQuitListener(this), this);
     }
 
     public CombatManager getCombatManager() {
@@ -54,15 +74,7 @@ public final class KitPvP extends JavaPlugin {
         return statsManager;
     }
 
-    private void validateConfig() {
-        long tagDuration = getConfig().getLong("combat.tag-duration", -1);
-        if (tagDuration <= 0) {
-            getLogger().severe("Invalid 'combat.tag-duration' in config.yml. It must be a positive number.");
-        }
-
-        String banDuration = getConfig().getString("combat.ban-duration", "");
-        if (banDuration.isEmpty()) {
-            getLogger().severe("Invalid 'combat.ban-duration' in config.yml. It cannot be empty.");
-        }
+    public DatabaseManager getDatabaseManager() {
+        return databaseManager;
     }
 }
