@@ -1,7 +1,7 @@
 package com.mythicamc.listeners;
 
 import com.mythicamc.KitPvP;
-import com.mythicamc.utility.CombatManager;
+import com.mythicamc.managers.CombatManager;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

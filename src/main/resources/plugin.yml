@@ -5,3 +5,4 @@ api-version: '1.21'
 authors: [ Rhydium ]
 description: KitPvP custom built for MythicaMC
 website: https://mythicamc.com
+softdepend: ["PlaceholderAPI"]

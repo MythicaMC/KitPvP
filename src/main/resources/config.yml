@@ -11,6 +11,19 @@ respawn:
   respawn-title: "&aReady to fight."
   respawn-subtitle: ""
 
+database:
+  # Options: 'mysql' or 'sqlite'
+  type: 'sqlite'
+
+  mysql:
+    host: 'localhost'
+    port: '3306'
+    database: 'mythica_kitpvp'
+    username: 'root'
+    password: 'password'
+
 messages:
+  join-message: "&8[&2+&8] &7%player_name% &7has joined the server."
+  leave-message: "&8[&4-&8] &7%player_name% &7has left the server."
   combat-tagged: "&cYou are now in combat!"
   combat-untagged: "&aYou are no longer in combat!"
