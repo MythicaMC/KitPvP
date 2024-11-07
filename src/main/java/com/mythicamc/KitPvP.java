@@ -1,5 +1,6 @@
 package com.mythicamc;
 
+import com.mythicamc.commands.BuildModeCommand;
 import com.mythicamc.listeners.PlayerQuitListener;
 import com.mythicamc.listeners.PlayerJoinListener;
 import com.mythicamc.listeners.PvPListener;
@@ -7,6 +8,8 @@ import com.mythicamc.managers.CombatManager;
 import com.mythicamc.managers.DatabaseManager;
 import com.mythicamc.managers.PlayerScoreboardManager;
 import com.mythicamc.managers.PlayerStatsManager;
+import com.mythicamc.utils.AntiGriefUtility;
+import com.mythicamc.utils.KitSelectorGUI;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class KitPvP extends JavaPlugin {
@@ -53,13 +56,16 @@ public final class KitPvP extends JavaPlugin {
     }
 
     private void registerCommands() {
-        // SOON
+        // Register command
+        getCommand("kitpvpbuild").setExecutor(new BuildModeCommand());
     }
 
     private void registerListeners() {
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
         getServer().getPluginManager().registerEvents(new PvPListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerQuitListener(this), this);
+        getServer().getPluginManager().registerEvents(new KitSelectorGUI(this), this);
+        getServer().getPluginManager().registerEvents(new AntiGriefUtility(), this);
     }
 
     public CombatManager getCombatManager() {

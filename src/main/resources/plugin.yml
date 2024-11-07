@@ -6,3 +6,8 @@ authors: [ Rhydium ]
 description: KitPvP custom built for MythicaMC
 website: https://mythicamc.com
 softdepend: ["PlaceholderAPI"]
+commands:
+  kitpvpbuild:
+    description: Toggles build mode for admins.
+    usage: /kitpvp build
+    permission: kitpvp.admin.build
