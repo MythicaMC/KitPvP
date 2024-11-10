@@ -4,10 +4,7 @@ import com.mythicamc.commands.BuildModeCommand;
 import com.mythicamc.listeners.PlayerQuitListener;
 import com.mythicamc.listeners.PlayerJoinListener;
 import com.mythicamc.listeners.PvPListener;
-import com.mythicamc.managers.CombatManager;
-import com.mythicamc.managers.DatabaseManager;
-import com.mythicamc.managers.PlayerScoreboardManager;
-import com.mythicamc.managers.PlayerStatsManager;
+import com.mythicamc.managers.*;
 import com.mythicamc.utils.AntiGriefUtility;
 import com.mythicamc.utils.KitSelectorGUI;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -18,6 +15,7 @@ public final class KitPvP extends JavaPlugin {
     private PlayerScoreboardManager scoreboardManager;
     private PlayerStatsManager statsManager;
     private DatabaseManager databaseManager;
+    private CustomConfigManager spawnConfigManager;
 
     @Override
     public void onEnable() {
@@ -33,6 +31,9 @@ public final class KitPvP extends JavaPlugin {
         combatManager = new CombatManager(this);
         statsManager = new PlayerStatsManager(databaseManager);
         scoreboardManager = new PlayerScoreboardManager(this);
+
+        // Initialize custom config managers
+        spawnConfigManager = new CustomConfigManager(this, "spawn.yml");
 
         // Start the scoreboard updater
         scoreboardManager.startScoreboardUpdater();
@@ -82,5 +83,10 @@ public final class KitPvP extends JavaPlugin {
 
     public DatabaseManager getDatabaseManager() {
         return databaseManager;
+    }
+
+    // Custom configs
+    public CustomConfigManager getSpawnConfigManager() {
+        return spawnConfigManager;
     }
 }
