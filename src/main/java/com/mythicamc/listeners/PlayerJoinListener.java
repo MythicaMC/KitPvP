@@ -1,15 +1,13 @@
 package com.mythicamc.listeners;
 
 import com.mythicamc.KitPvP;
+import com.mythicamc.utils.KitSelectorGUI;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 public class PlayerJoinListener implements Listener {
 
@@ -39,13 +37,6 @@ public class PlayerJoinListener implements Listener {
         plugin.getScoreboardManager().updateScoreboard(player);
 
         // Give player a chest item for kit selection
-        ItemStack kitSelector = new ItemStack(Material.CHEST);
-        ItemMeta meta = kitSelector.getItemMeta();
-        if (meta != null) {
-            meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&6&lKit Selector"));
-            kitSelector.setItemMeta(meta);
-        }
-
-        player.getInventory().setItem(0, kitSelector);
+        KitSelectorGUI.givePlayerKitSelectorItem(player);
     }
 }

@@ -191,6 +191,9 @@ public class KitSelectorGUI implements Listener {
                         return;
                     }
 
+                    // Clear inventory of other items before giving kit items
+                    player.getInventory().clear();
+
                     List<Map<?, ?>> items = selectedKit.getMapList("items");
                     for (Map<?, ?> itemData : items) {
                         try {
@@ -253,6 +256,17 @@ public class KitSelectorGUI implements Listener {
                 }
             }
         }
+    }
+
+    public static void givePlayerKitSelectorItem(Player player) {
+        ItemStack kitSelector = new ItemStack(Material.CHEST);
+        ItemMeta meta = kitSelector.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&6&lKit Selector"));
+            kitSelector.setItemMeta(meta);
+        }
+
+        player.getInventory().setItem(0, kitSelector);
     }
 
     public static void handleInventoryClose(InventoryCloseEvent event) {
