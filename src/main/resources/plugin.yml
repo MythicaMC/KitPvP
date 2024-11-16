@@ -5,7 +5,7 @@ api-version: '1.21'
 authors: [ Rhydium ]
 description: KitPvP custom built for MythicaMC
 website: https://mythicamc.com
-softdepend: ["PlaceholderAPI"]
+softdepend: ["WorldGuard", "PlaceholderAPI"]
 commands:
   kitpvpbuild:
     description: Toggles build mode for admins.

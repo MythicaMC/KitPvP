@@ -1,9 +1,16 @@
+# Anti Combatlog settings
 combat:
   tag-duration: 15    # Duration in seconds that players remain in combat after being hit
   ban-duration: 10m   # Duration of the temporary ban (e.g., '10m' for 10 minutes)
 
+# Coins related settings
 kill-reward: 10 # Coins rewarded per kill
 
+# Set the spawn region and pvp region. Currently depends on WorldGuard.
+spawn-region: "spawn"
+pvp-region: "pvp"
+
+# Set options related to respawning and the messages shown while respawning.
 respawn:
   countdown: 3
   death-title: "&cYOU DIED!"
@@ -11,6 +18,8 @@ respawn:
   respawn-title: "&aReady to fight."
   respawn-subtitle: ""
 
+# Database options
+# Currently supported: mysql and sqlite.
 database:
   # Options: 'mysql' or 'sqlite'
   type: 'sqlite'
@@ -22,6 +31,7 @@ database:
     username: 'root'
     password: 'password'
 
+# Custom messages, wow!
 messages:
   join-message: "&8[&2+&8] &7%player_name% &7has joined the server."
   leave-message: "&8[&4-&8] &7%player_name% &7has left the server."
