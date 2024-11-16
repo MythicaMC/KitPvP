@@ -40,3 +40,4 @@ jobs:
       with:
         name: KitPvP.jar
         path: target/KitPvP-1.0-SNAPSHOT.jar
+        retention-days: 2
