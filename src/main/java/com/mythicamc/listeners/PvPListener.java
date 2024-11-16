@@ -3,6 +3,7 @@ package com.mythicamc.listeners;
 import com.mythicamc.KitPvP;
 import com.mythicamc.managers.CombatManager;
 import com.mythicamc.utils.KitSelectorGUI;
+import com.mythicamc.utils.WorldGuardUtils;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
@@ -15,6 +16,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -46,6 +48,13 @@ public class PvPListener implements Listener {
                 if (projectile.getShooter() instanceof Player) {
                     damager = (Player) projectile.getShooter();
                 }
+            }
+
+            // Check if event happens in spawn
+            if (WorldGuardUtils.isInRegion(damager, "spawn") || WorldGuardUtils.isInRegion(damaged, "spawn")) {
+                event.setCancelled(true);
+                damager.sendMessage("PvP is not allowed in the spawn area.");
+                return;
             }
 
             // Tag both players only if the damager is a player
@@ -93,6 +102,11 @@ public class PvPListener implements Listener {
                 simulateDeath(victim, null); // Simulate death with no specific killer
             }
         }
+    }
+
+    @EventHandler
+    public void onPlayerMove(PlayerMoveEvent event) {
+        // TO DO: Check if player tries to leave spawn area without a kit selected.
     }
 
     private void startRespawnCountdown(Player player) {
